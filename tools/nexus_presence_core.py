@@ -24,14 +24,14 @@ class NexusMemoryState:
         if not os.path.exists(self.opp_path):
             self.save_opp({"active_opportunities": [], "financial_context": {}})
 
-    def load_him(self): return json.load(open(self.him_path))
-    def save_him(self, data): json.dump(data, open(self.him_path, 'w'), indent=2)
-    def load_ctm(self): return json.load(open(self.ctm_path))
-    def save_ctm(self, data): json.dump(data, open(self.ctm_path, 'w'), indent=2)
-    def load_cpl(self): return json.load(open(self.cpl_path))
-    def save_cpl(self, data): json.dump(data, open(self.cpl_path, 'w'), indent=2)
-    def load_opp(self): return json.load(open(self.opp_path))
-    def save_opp(self, data): json.dump(data, open(self.opp_path, 'w'), indent=2)
+    def load_him(self): return json.load(open(self.him_path, encoding='utf-8'))
+    def save_him(self, data): json.dump(data, open(self.him_path, 'w', encoding='utf-8'), indent=2)
+    def load_ctm(self): return json.load(open(self.ctm_path, encoding='utf-8'))
+    def save_ctm(self, data): json.dump(data, open(self.ctm_path, 'w', encoding='utf-8'), indent=2)
+    def load_cpl(self): return json.load(open(self.cpl_path, encoding='utf-8'))
+    def save_cpl(self, data): json.dump(data, open(self.cpl_path, 'w', encoding='utf-8'), indent=2)
+    def load_opp(self): return json.load(open(self.opp_path, encoding='utf-8'))
+    def save_opp(self, data): json.dump(data, open(self.opp_path, 'w', encoding='utf-8'), indent=2)
 
 def calculate_text_metrics(text):
     words = re.findall(r'\b\w+\b', text.lower())

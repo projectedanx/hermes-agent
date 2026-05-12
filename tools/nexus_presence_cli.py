@@ -8,7 +8,7 @@ def cmd_init_profile(args):
     state = NexusMemoryState()
 
     if args.sample_file and os.path.exists(args.sample_file):
-        with open(args.sample_file, 'r') as f:
+        with open(args.sample_file, 'r', encoding='utf-8') as f:
             text = f.read()
     elif args.text:
         text = args.text
