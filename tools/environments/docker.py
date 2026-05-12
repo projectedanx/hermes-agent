@@ -630,12 +630,20 @@ class DockerEnvironment(BaseEnvironment):
         """Stop and remove the container. Bind-mount dirs persist if persistent=True."""
         if self._container_id:
             try:
-                # Stop in background so cleanup doesn't block
-                stop_cmd = (
-                    f"(timeout 60 {self._docker_exe} stop {self._container_id} || "
-                    f"{self._docker_exe} rm -f {self._container_id}) >/dev/null 2>&1 &"
+                # Stop in background so cleanup doesn't block.
+                # We use a list to avoid shell injection and pass arguments safely.
+                subprocess.Popen(
+                    [
+                        "sh",
+                        "-c",
+                        'timeout 60 "$1" stop "$2" || "$1" rm -f "$2"',
+                        "_",  # $0
+                        self._docker_exe,
+                        self._container_id,
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                 )
-                subprocess.Popen(stop_cmd, shell=True)
             except Exception as e:
                 logger.warning("Failed to stop container %s: %s", self._container_id, e)
 
@@ -643,8 +651,16 @@ class DockerEnvironment(BaseEnvironment):
                 # Also schedule removal (stop only leaves it as stopped)
                 try:
                     subprocess.Popen(
-                        f"sleep 3 && {self._docker_exe} rm -f {self._container_id} >/dev/null 2>&1 &",
-                        shell=True,
+                        [
+                            "sh",
+                            "-c",
+                            'sleep 3 && "$1" rm -f "$2"',
+                            "_",
+                            self._docker_exe,
+                            self._container_id,
+                        ],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
                     )
                 except Exception:
                     pass
