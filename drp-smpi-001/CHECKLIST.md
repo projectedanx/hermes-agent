@@ -1,0 +1,22 @@
+# NEXUS-PRESENCE Implementation Checklist
+
+- [ ] 1. Define Directory Structure
+  - Create `skills/social-media/nexus-presence/` directory.
+  - Create `SKILL.md` detailing the agentic workflows, required metadata, and tool interfaces.
+- [ ] 2. Core Memory Structures Initialization (Data Layer)
+  - Create Python scripts/modules to manage HIM, CTM, CPL, and OPP data structures (JSON/SQLite).
+- [ ] 3. Implement Skill 01: Social Topology Profiling
+  - Connect with existing `xurl` skill to scrape/analyze Twitter/X topology.
+- [ ] 4. Implement Skill 02: Voice Fingerprint Extraction & Lock
+  - Build script to measure text against baseline characteristics (cosine similarity, rhythm, hedging, etc).
+- [ ] 5. Implement Skill 06: Proactive Network Maintenance (Cron)
+  - Set up hooks or instructions for using Hermes cron to trigger weekly/monthly reviews.
+- [ ] 6. End-to-End Workflow Scripts
+  - `nexus_init.py` (Stage 0)
+  - `nexus_profile.py` (Stage 1)
+  - `nexus_draft.py` (Stage 2 & 3)
+- [ ] 7. Update Repository Documentation
+  - Ensure `README.md` (or relevant top-level docs) reflects the addition of the NEXUS-PRESENCE skill.
+  - Document lessons learned from previous iterations.
+- [ ] 8. Pre-commit & Verification
+  - Run tests/lints/pre-commit hooks to ensure integration is solid.
