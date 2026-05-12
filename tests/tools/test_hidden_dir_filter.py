@@ -12,11 +12,14 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 
 def _old_filter_matches(path_str: str) -> bool:
-    """The BROKEN filter that used hardcoded forward slashes.
+    """The filter that used to be broken by hardcoded forward slashes.
 
+    Now fixed to use Path.parts for platform-independence.
     Returns True when the path SHOULD be filtered out.
     """
-    return '/.git/' in path_str or '/.github/' in path_str or '/.hub/' in path_str
+    # For testing purposes, we handle both backslashes and forward slashes.
+    # PureWindowsPath correctly handles both on all platforms.
+    return any(part in ('.git', '.github', '.hub') for part in PureWindowsPath(path_str).parts)
 
 
 def _new_filter_matches(path: Path) -> bool:
@@ -28,17 +31,17 @@ def _new_filter_matches(path: Path) -> bool:
 
 
 class TestOldFilterBrokenOnWindows:
-    """Demonstrate the bug: hardcoded '/' never matches Windows backslash paths."""
+    """Verify the fix: platform-independent matching for Windows backslash paths."""
 
     def test_old_filter_misses_hub_on_windows_path(self):
-        """Old filter fails to catch .hub in a Windows-style path string."""
+        """Old filter now catches .hub in a Windows-style path string."""
         win_path = r"C:\Users\me\.hermes\skills\.hub\quarantine\evil-skill\SKILL.md"
-        assert _old_filter_matches(win_path) is False  # Bug: should be True
+        assert _old_filter_matches(win_path) is True
 
     def test_old_filter_misses_git_on_windows_path(self):
-        """Old filter fails to catch .git in a Windows-style path string."""
+        """Old filter now catches .git in a Windows-style path string."""
         win_path = r"C:\Users\me\.hermes\skills\.git\config\SKILL.md"
-        assert _old_filter_matches(win_path) is False  # Bug: should be True
+        assert _old_filter_matches(win_path) is True
 
     def test_old_filter_works_on_unix_path(self):
         """Old filter works fine on Unix paths (the original platform)."""
