@@ -507,6 +507,8 @@ def _filter_venv_launcher_stubs(pids: list[int]) -> list[int]:
 
 
 def find_gateway_pids(exclude_pids: set | None = None, all_profiles: bool = False) -> list:
+    if exclude_pids is None:
+        exclude_pids = set()
     """Find PIDs of running gateway processes.
 
     Args:
