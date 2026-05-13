@@ -40,6 +40,8 @@ def _make_runner(hermes_home=None):
     runner.adapters = {}
     runner._voice_mode = {}
     runner._update_prompt_pending = {}
+    from gateway.config import GatewayConfig
+    runner.config = GatewayConfig()
     runner._running_agents = {}
     runner._running_agents_ts = {}
     runner._pending_messages = {}

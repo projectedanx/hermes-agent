@@ -194,3 +194,7 @@ scripts/run_tests.sh
 MIT — see [LICENSE](LICENSE).
 
 Built by [Nous Research](https://nousresearch.com).
+
+### NEXUS-PRESENCE Integration
+The `hermes-agent` now includes an emergent skill: **NEXUS-PRESENCE (SMPI-001)**.
+Found in `skills/social-media/nexus-presence`, this module enables the agent to act as a *relational intelligence*. It profiles community topologies, extracts and locks onto the user's authentic voice fingerprint (preventing persona collapse), and proactively manages an opportunity pipeline. See `drp-smpi-001/STRATEGY.md` for architectural details.

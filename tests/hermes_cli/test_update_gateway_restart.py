@@ -1070,17 +1070,21 @@ class TestFindGatewayPidsExclude:
         monkeypatch.setattr(gateway_cli, "is_windows", lambda: False)
 
         def fake_run(cmd, **kwargs):
-            return subprocess.CompletedProcess(
-                cmd, 0,
-                stdout=(
-                    "user  100  0.0  0.0  0  0  ?  S  00:00  0:00  python gateway/run.py\n"
-                    "user  200  0.0  0.0  0  0  ?  S  00:00  0:00  python gateway/run.py\n"
-                ),
-                stderr="",
-            )
+            if "ps" in cmd:
+                return subprocess.CompletedProcess(
+                    cmd, 0,
+                    stdout=(
+                        "100 python gateway/run.py\n"
+                        "200 python gateway/run.py\n"
+                    ),
+                    stderr="",
+                )
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+        monkeypatch.setattr("os.path.isdir", lambda p: False if p == "/proc" else True)
 
         monkeypatch.setattr(gateway_cli.subprocess, "run", fake_run)
         monkeypatch.setattr("os.getpid", lambda: 999)
+        monkeypatch.setattr("gateway.status.get_running_pid", lambda: None)
 
         pids = gateway_cli.find_gateway_pids(exclude_pids={100})
         assert 100 not in pids
@@ -1090,17 +1094,21 @@ class TestFindGatewayPidsExclude:
         monkeypatch.setattr(gateway_cli, "is_windows", lambda: False)
 
         def fake_run(cmd, **kwargs):
-            return subprocess.CompletedProcess(
-                cmd, 0,
-                stdout=(
-                    "user  100  0.0  0.0  0  0  ?  S  00:00  0:00  python gateway/run.py\n"
-                    "user  200  0.0  0.0  0  0  ?  S  00:00  0:00  python gateway/run.py\n"
-                ),
-                stderr="",
-            )
+            if "ps" in cmd:
+                return subprocess.CompletedProcess(
+                    cmd, 0,
+                    stdout=(
+                        "100 python gateway/run.py\n"
+                        "200 python gateway/run.py\n"
+                    ),
+                    stderr="",
+                )
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+        monkeypatch.setattr("os.path.isdir", lambda p: False if p == "/proc" else True)
 
         monkeypatch.setattr(gateway_cli.subprocess, "run", fake_run)
         monkeypatch.setattr("os.getpid", lambda: 999)
+        monkeypatch.setattr("gateway.status.get_running_pid", lambda: None)
 
         pids = gateway_cli.find_gateway_pids()
         assert 100 in pids
@@ -1113,17 +1121,21 @@ class TestFindGatewayPidsExclude:
         monkeypatch.setattr(gateway_cli, "get_hermes_home", lambda: profile_dir)
 
         def fake_run(cmd, **kwargs):
-            return subprocess.CompletedProcess(
-                cmd, 0,
-                stdout=(
-                    "100 /Users/dgrieco/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main --profile orcha gateway run --replace\n"
-                    "200 /Users/dgrieco/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main --profile other gateway run --replace\n"
-                ),
-                stderr="",
-            )
+            if "ps" in cmd:
+                return subprocess.CompletedProcess(
+                    cmd, 0,
+                    stdout=(
+                        "100 /Users/dgrieco/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main --profile orcha gateway run --replace\n"
+                        "200 /Users/dgrieco/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main --profile other gateway run --replace\n"
+                    ),
+                    stderr="",
+                )
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+        monkeypatch.setattr("os.path.isdir", lambda p: False if p == "/proc" else True)
 
         monkeypatch.setattr(gateway_cli.subprocess, "run", fake_run)
         monkeypatch.setattr("os.getpid", lambda: 999)
+        monkeypatch.setattr("gateway.status.get_running_pid", lambda: None)
         monkeypatch.setattr(gateway_cli, "_get_service_pids", lambda: set())
         monkeypatch.setattr(gateway_cli, "_profile_arg", lambda hermes_home=None: "--profile orcha")
 

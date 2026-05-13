@@ -103,7 +103,7 @@ class TestCleanupStaleAsyncClients:
         mock_client._client = MagicMock()
         mock_client._client.is_closed = False
 
-        key = ("test_stale", True, "", "", "", (), False)
+        key = ("test_stale", True, "", "", "", (), False, "")
         with _client_cache_lock:
             _client_cache[key] = (mock_client, "test-model", loop)
 
@@ -127,7 +127,7 @@ class TestCleanupStaleAsyncClients:
         loop = asyncio.new_event_loop()  # NOT closed
 
         mock_client = MagicMock()
-        key = ("test_live", True, "", "", "", (), False)
+        key = ("test_live", True, "", "", "", (), False, "")
         with _client_cache_lock:
             _client_cache[key] = (mock_client, "test-model", loop)
 
@@ -149,7 +149,7 @@ class TestCleanupStaleAsyncClients:
         )
 
         mock_client = MagicMock()
-        key = ("test_sync", False, "", "", "", (), False)
+        key = ("test_sync", False, "", "", "", (), False, "")
         with _client_cache_lock:
             _client_cache[key] = (mock_client, "test-model", None)
 
@@ -182,7 +182,7 @@ class TestClientCacheBoundedGrowth:
             _get_cached_client,
         )
 
-        key = ("test_replace", True, "", "", "", (), False)
+        key = ("test_replace", True, "", "", "", (), False, "")
 
         # Simulate a stale entry from a closed loop
         old_loop = asyncio.new_event_loop()
@@ -190,6 +190,8 @@ class TestClientCacheBoundedGrowth:
         old_client = MagicMock()
         old_client._client = MagicMock()
         old_client._client.is_closed = False
+        from unittest.mock import AsyncMock
+        old_client.close = AsyncMock()
 
         with _client_cache_lock:
             _client_cache[key] = (old_client, "old-model", old_loop)
@@ -198,9 +200,11 @@ class TestClientCacheBoundedGrowth:
             # Now call _get_cached_client — should detect stale loop and evict
             with patch("agent.auxiliary_client.resolve_provider_client") as mock_resolve:
                 mock_resolve.return_value = (MagicMock(), "new-model")
-                client, model = _get_cached_client(
-                    "test_replace", async_mode=True,
-                )
+                with patch("asyncio.get_event_loop") as mock_get_loop:
+                    mock_get_loop.return_value = asyncio.new_event_loop()
+                    client, model = _get_cached_client(
+                        "test_replace", async_mode=True,
+                    )
             # The old entry should have been replaced
             with _client_cache_lock:
                 assert key in _client_cache, "Key should still exist (replaced)"
@@ -217,7 +221,7 @@ class TestClientCacheBoundedGrowth:
             _client_cache_lock,
         )
 
-        key = ("test_no_grow", True, "", "", "", (), False)
+        key = ("test_no_grow", True, "", "", "", (), False, "")
 
         loops = []
         try:
@@ -269,7 +273,7 @@ class TestClientCacheBoundedGrowth:
                 mock_client = MagicMock()
                 mock_client._client = MagicMock()
                 mock_client._client.is_closed = False
-                key = (f"evict_test_{i}", False, "", "", "", (), False)
+                key = (f"evict_test_{i}", False, "", "", "", (), False, "")
                 with _client_cache_lock:
                     # Inline the eviction logic (same as _get_cached_client)
                     while len(_client_cache) >= _CLIENT_CACHE_MAX_SIZE:
@@ -281,9 +285,9 @@ class TestClientCacheBoundedGrowth:
                 assert len(_client_cache) <= _CLIENT_CACHE_MAX_SIZE, \
                     f"Cache size {len(_client_cache)} exceeds max {_CLIENT_CACHE_MAX_SIZE}"
                 # The earliest entries should have been evicted
-                assert ("evict_test_0", False, "", "", "", (), False) not in _client_cache
+                assert ("evict_test_0", False, "", "", "", (), False, "") not in _client_cache
                 # The latest entries should be present
-                assert (f"evict_test_{_CLIENT_CACHE_MAX_SIZE + 4}", False, "", "", "", (), False) in _client_cache
+                assert (f"evict_test_{_CLIENT_CACHE_MAX_SIZE + 4}", False, "", "", "", (), False, "") in _client_cache
         finally:
             with _client_cache_lock:
                 _client_cache.clear()

@@ -120,8 +120,10 @@ async def test_streaming_delivery_routes_telegram_flac_media_tag_to_document_sen
         send_video=AsyncMock(return_value=SendResult(success=True, message_id="video")),
     )
 
-    await GatewayRunner._deliver_media_from_response(
-        object(),
+    runner = object.__new__(GatewayRunner)
+    runner._thread_metadata_for_source = lambda *_: {"thread_id": "topic-1"}
+    runner._reply_anchor_for_event = lambda *_: None
+    await runner._deliver_media_from_response(
         "MEDIA:/tmp/speech.flac",
         event,
         adapter,
@@ -149,8 +151,10 @@ async def test_streaming_delivery_routes_non_voice_telegram_ogg_media_tag_to_doc
         send_video=AsyncMock(return_value=SendResult(success=True, message_id="video")),
     )
 
-    await GatewayRunner._deliver_media_from_response(
-        object(),
+    runner = object.__new__(GatewayRunner)
+    runner._thread_metadata_for_source = lambda *_: {"thread_id": "topic-1"}
+    runner._reply_anchor_for_event = lambda *_: None
+    await runner._deliver_media_from_response(
         "MEDIA:/tmp/speech.ogg",
         event,
         adapter,
@@ -180,8 +184,10 @@ async def test_streaming_delivery_routes_telegram_mp3_media_tag_to_voice_sender(
         send_video=AsyncMock(return_value=SendResult(success=True, message_id="video")),
     )
 
-    await GatewayRunner._deliver_media_from_response(
-        object(),
+    runner = object.__new__(GatewayRunner)
+    runner._thread_metadata_for_source = lambda *_: {"thread_id": "topic-1"}
+    runner._reply_anchor_for_event = lambda *_: None
+    await runner._deliver_media_from_response(
         "MEDIA:/tmp/speech.mp3",
         event,
         adapter,
