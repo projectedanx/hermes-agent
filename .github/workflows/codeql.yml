@@ -61,8 +61,8 @@ jobs:
         # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
-ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true
+      uses: actions/checkout@v6
+
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
