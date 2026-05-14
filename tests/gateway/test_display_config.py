@@ -41,8 +41,7 @@ class TestResolveDisplaySetting:
 
         # Empty config — should get built-in defaults
         config = {}
-        # Telegram tier_high override: "all" (not "all") to reduce edit
-        # pressure during streaming on Telegram's ~1 edit/s flood envelope.
+        # Telegram tier_high defaults to "all".
         assert resolve_display_setting(config, "telegram", "tool_progress") == "all"
         # Email defaults to tier_minimal → "off"
         assert resolve_display_setting(config, "email", "tool_progress") == "off"
