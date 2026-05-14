@@ -6,9 +6,9 @@ Automatically tests jailbreak techniques against the current model,
 finds what works, and locks it in by writing config.yaml + prefill.json.
 
 Usage in execute_code:
-    exec(open(os.path.expanduser(
-        os.path.join(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")), "skills/red-teaming/godmode/scripts/auto_jailbreak.py")
-    )).read())
+    import sys, os
+    sys.path.insert(0, os.path.join(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")), "skills/red-teaming/godmode/scripts"))
+    from auto_jailbreak import *
     
     result = auto_jailbreak()  # Uses current model from config
     # or:
