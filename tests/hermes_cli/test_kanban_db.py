@@ -1530,3 +1530,29 @@ def test_task_dict_survives_corrupt_created_at(tmp_path, monkeypatch):
         conn.close()
     age = kb.task_age(task)
     assert age["created_age_seconds"] is None
+
+def test_set_max_runtime_updates_value(kanban_home):
+    with kb.connect() as conn:
+        t = kb.create_task(conn, title="test max runtime update")
+        task_before = kb.get_task(conn, t)
+        assert task_before.max_runtime_seconds is None
+
+        assert kb.set_max_runtime(conn, t, 120) is True
+
+        task_after = kb.get_task(conn, t)
+        assert task_after.max_runtime_seconds == 120
+
+def test_set_max_runtime_clears_value(kanban_home):
+    with kb.connect() as conn:
+        t = kb.create_task(conn, title="test max runtime clear", max_runtime_seconds=300)
+        task_before = kb.get_task(conn, t)
+        assert task_before.max_runtime_seconds == 300
+
+        assert kb.set_max_runtime(conn, t, None) is True
+
+        task_after = kb.get_task(conn, t)
+        assert task_after.max_runtime_seconds is None
+
+def test_set_max_runtime_nonexistent_task(kanban_home):
+    with kb.connect() as conn:
+        assert kb.set_max_runtime(conn, "made_up_id", 60) is False
