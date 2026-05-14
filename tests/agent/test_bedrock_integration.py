@@ -13,6 +13,7 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
+from hermes_constants import AWS_BEDROCK_SDK_PLACEHOLDER
 
 
 class TestProviderRegistry:
@@ -148,7 +149,7 @@ class TestRuntimeProvider:
         assert result["api_mode"] == "bedrock_converse"
         assert result["region"] == "eu-west-1"
         assert "bedrock-runtime.eu-west-1.amazonaws.com" in result["base_url"]
-        assert result["api_key"] == "aws-sdk"
+        assert result["api_key"] == AWS_BEDROCK_SDK_PLACEHOLDER
 
     def test_bedrock_runtime_default_region(self, monkeypatch):
         from hermes_cli.runtime_provider import resolve_runtime_provider
@@ -524,7 +525,7 @@ class TestAuxiliaryClientBedrockResolution:
         )
         assert isinstance(client, AnthropicAuxiliaryClient)
         assert model is not None
-        assert client.api_key == "aws-sdk"
+        assert client.api_key == AWS_BEDROCK_SDK_PLACEHOLDER
         assert "us-west-2" in client.base_url
 
     def test_bedrock_returns_none_without_credentials(self, monkeypatch):

@@ -28,7 +28,7 @@ from hermes_cli.auth import (
     has_usable_secret,
 )
 from hermes_cli.config import get_compatible_custom_providers, load_config
-from hermes_constants import OPENROUTER_BASE_URL
+from hermes_constants import OPENROUTER_BASE_URL, AWS_BEDROCK_SDK_PLACEHOLDER
 from utils import base_url_host_matches, base_url_hostname
 
 
@@ -1245,7 +1245,7 @@ def resolve_runtime_provider(
         _bedrock_cfg = load_config().get("bedrock", {})
         # Region priority: config.yaml bedrock.region → env var → us-east-1
         region = (_bedrock_cfg.get("region") or "").strip() or resolve_bedrock_region()
-        auth_source = resolve_aws_auth_env_var() or "aws-sdk-default-chain"
+        auth_source = resolve_aws_auth_env_var() or f"{AWS_BEDROCK_SDK_PLACEHOLDER}-default-chain"
         # Build guardrail config if configured
         _gr = _bedrock_cfg.get("guardrail", {})
         guardrail_config = None
@@ -1268,7 +1268,7 @@ def resolve_runtime_provider(
                 "provider": "bedrock",
                 "api_mode": "anthropic_messages",
                 "base_url": f"https://bedrock-runtime.{region}.amazonaws.com",
-                "api_key": "aws-sdk",
+                "api_key": AWS_BEDROCK_SDK_PLACEHOLDER,
                 "source": auth_source,
                 "region": region,
                 "bedrock_anthropic": True,  # Signal to use AnthropicBedrock client
@@ -1280,7 +1280,7 @@ def resolve_runtime_provider(
                 "provider": "bedrock",
                 "api_mode": "bedrock_converse",
                 "base_url": f"https://bedrock-runtime.{region}.amazonaws.com",
-                "api_key": "aws-sdk",
+                "api_key": AWS_BEDROCK_SDK_PLACEHOLDER,
                 "source": auth_source,
                 "region": region,
                 "requested_provider": requested_provider,

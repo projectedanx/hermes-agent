@@ -68,7 +68,7 @@ from urllib.parse import urlparse, parse_qs, urlunparse
 from datetime import datetime
 from pathlib import Path
 
-from hermes_constants import get_hermes_home
+from hermes_constants import get_hermes_home, AWS_BEDROCK_SDK_PLACEHOLDER
 
 
 _OPENAI_CLS_CACHE: Optional[type] = None
@@ -1520,10 +1520,10 @@ class AIAgent:
                 _br_region = _region_match.group(1) if _region_match else "us-east-1"
                 self._bedrock_region = _br_region
                 self._anthropic_client = build_anthropic_bedrock_client(_br_region)
-                self._anthropic_api_key = "aws-sdk"
+                self._anthropic_api_key = AWS_BEDROCK_SDK_PLACEHOLDER
                 self._anthropic_base_url = base_url
                 self._is_anthropic_oauth = False
-                self.api_key = "aws-sdk"
+                self.api_key = AWS_BEDROCK_SDK_PLACEHOLDER
                 self.client = None
                 self._client_kwargs = {}
                 if not self.quiet_mode:
