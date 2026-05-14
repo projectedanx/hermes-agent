@@ -8,6 +8,9 @@ import os
 from pathlib import Path
 
 
+AWS_BEDROCK_SDK_PLACEHOLDER = "aws-sdk"
+
+
 _profile_fallback_warned: bool = False
 
 
