@@ -29,11 +29,11 @@ class TestResolveDisplaySetting:
 
         config = {
             "display": {
-                "tool_progress": "new",
+                "tool_progress": "all",
                 "platforms": {},
             }
         }
-        assert resolve_display_setting(config, "telegram", "tool_progress") == "new"
+        assert resolve_display_setting(config, "telegram", "tool_progress") == "all"
 
     def test_platform_default_when_no_user_config(self):
         """Falls back to built-in platform default."""
@@ -41,9 +41,8 @@ class TestResolveDisplaySetting:
 
         # Empty config — should get built-in defaults
         config = {}
-        # Telegram tier_high override: "new" (not "all") to reduce edit
-        # pressure during streaming on Telegram's ~1 edit/s flood envelope.
-        assert resolve_display_setting(config, "telegram", "tool_progress") == "new"
+        # Telegram tier_high defaults to "all".
+        assert resolve_display_setting(config, "telegram", "tool_progress") == "all"
         # Email defaults to tier_minimal → "off"
         assert resolve_display_setting(config, "email", "tool_progress") == "off"
 
@@ -111,10 +110,10 @@ class TestBackwardCompat:
             "display": {
                 "tool_progress": "all",
                 "tool_progress_overrides": {"telegram": "verbose"},
-                "platforms": {"telegram": {"tool_progress": "new"}},
+                "platforms": {"telegram": {"tool_progress": "all"}},
             }
         }
-        assert resolve_display_setting(config, "telegram", "tool_progress") == "new"
+        assert resolve_display_setting(config, "telegram", "tool_progress") == "all"
 
     def test_legacy_overrides_only_for_tool_progress(self):
         """Legacy overrides don't affect other settings."""
@@ -184,8 +183,8 @@ class TestPlatformDefaults:
         but overrides tool_progress to 'new' (less edit pressure)."""
         from gateway.display_config import resolve_display_setting
 
-        # Telegram: tier_high member with tool_progress="new" override.
-        assert resolve_display_setting({}, "telegram", "tool_progress") == "new"
+        # Telegram: tier_high member with tool_progress="all" override.
+        assert resolve_display_setting({}, "telegram", "tool_progress") == "all"
         # Discord: pure tier_high.
         assert resolve_display_setting({}, "discord", "tool_progress") == "all"
 

@@ -42,6 +42,7 @@ class TestSlashCommands:
 
     @pytest.mark.asyncio
     async def test_new_resets_session(self, adapter, runner, platform):
+        runner._read_user_config = MagicMock(return_value={"approvals": {"destructive_slash_confirm": False}})
         send = await send_and_capture(adapter, "/new", platform)
 
         send.assert_called_once()
@@ -167,6 +168,7 @@ class TestSessionLifecycle:
 
     @pytest.mark.asyncio
     async def test_new_then_status_reflects_reset(self, adapter, runner, session_entry, platform):
+        runner._read_user_config = MagicMock(return_value={"approvals": {"destructive_slash_confirm": False}})
         """After /new, /status should report the fresh session."""
         await send_and_capture(adapter, "/new", platform)
         runner.session_store.reset_session.assert_called_once()
@@ -179,6 +181,7 @@ class TestSessionLifecycle:
 
     @pytest.mark.asyncio
     async def test_new_is_idempotent(self, adapter, runner, platform):
+        runner._read_user_config = MagicMock(return_value={"approvals": {"destructive_slash_confirm": False}})
         """/new called twice should not crash."""
         await send_and_capture(adapter, "/new", platform)
         await send_and_capture(adapter, "/new", platform)

@@ -156,6 +156,7 @@ class TestHandleVisionAnalyzeFastPath:
         # Set runtime override so the handler thinks we're on opus@openrouter
         from agent.auxiliary_client import set_runtime_main, clear_runtime_main
         set_runtime_main("openrouter", "anthropic/claude-opus-4.6")
+        monkeypatch.setenv("OPENROUTER_API_KEY", "dummy")
         try:
             coro = _handle_vision_analyze({"image_url": str(img), "question": "?"})
             result = asyncio.get_event_loop().run_until_complete(coro)
