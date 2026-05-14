@@ -899,11 +899,11 @@ def _resolve_trust_level(source: str) -> str:
     if normalized_source == "agent-created":
         return "agent-created"
     # Official optional skills shipped with the repo
-    if normalized_source.startswith("official/") or normalized_source == "official":
+    if normalized_source == "official" or normalized_source.startswith("official/"):
         return "builtin"
     # Check if source matches any trusted repo
     for trusted in TRUSTED_REPOS:
-        if normalized_source.startswith(trusted) or normalized_source == trusted:
+        if normalized_source == trusted or normalized_source.startswith(f"{trusted}/"):
             return "trusted"
     return "community"
 

@@ -2401,7 +2401,7 @@ class OptionalSkillSource(SkillSource):
         # Guard against path traversal (e.g. "official/../../etc")
         try:
             resolved = skill_dir.resolve()
-            if not str(resolved).startswith(str(self._optional_dir.resolve())):
+            if not resolved.is_relative_to(self._optional_dir.resolve()):
                 return None
         except (OSError, ValueError):
             return None
