@@ -45,13 +45,13 @@ _parseltongue_path = _SCRIPTS_DIR / "parseltongue.py"
 _race_path = _SCRIPTS_DIR / "godmode_race.py"
 
 # Use the calling frame's globals so functions are accessible everywhere
-import inspect as _inspect
-_caller_globals = _inspect.stack()[0][0].f_globals if len(_inspect.stack()) > 0 else globals()
 
-if _parseltongue_path.exists():
-    exec(compile(open(_parseltongue_path).read(), str(_parseltongue_path), 'exec'), _caller_globals)
-if _race_path.exists():
-    exec(compile(open(_race_path).read(), str(_race_path), 'exec'), _caller_globals)
+import sys
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
+
+from parseltongue import *
+from godmode_race import *
 
 # ═══════════════════════════════════════════════════════════════════
 # Hermes config paths
