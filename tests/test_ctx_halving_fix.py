@@ -246,12 +246,10 @@ class TestContextNotHalvedOnOutputCapError:
         agent._is_anthropic_oauth = False
         agent._ephemeral_max_output_tokens = None
         agent._use_long_lived_prefix_cache = False
-        agent._use_long_lived_prefix_cache = False
         agent._provider_name = "anthropic"
         agent._is_deepseek_reasoner = False
         agent._is_gemini = False
         agent.api_key = "dummy"
-        agent._provider_name = "anthropic"
         agent.log_prefix = ""
         agent.quiet_mode = True
         agent.verbose_logging = False
