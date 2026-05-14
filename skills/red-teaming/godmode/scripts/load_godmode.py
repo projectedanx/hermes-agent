@@ -1,10 +1,10 @@
 """
-Loader for G0DM0D3 scripts. Handles the exec-scoping issues.
+Loader for G0DM0D3 scripts. Handles scoping issues without using insecure exec().
 
 Usage in execute_code:
-    exec(open(os.path.expanduser(
-        os.path.join(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")), "skills/red-teaming/godmode/scripts/load_godmode.py")
-    )).read())
+    import sys, os
+    sys.path.insert(0, os.path.join(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")), "skills/red-teaming/godmode/scripts"))
+    from load_godmode import *
     
     # Now all functions are available:
     # - auto_jailbreak(), undo_jailbreak()
@@ -14,32 +14,28 @@ Usage in execute_code:
     # - escalate_encoding()
 """
 
-import os, sys
+import os
+import sys
 from pathlib import Path
 
 _gm_scripts_dir = Path(os.getenv("HERMES_HOME", Path.home() / ".hermes")) / "skills" / "red-teaming" / "godmode" / "scripts"
 
+if not _gm_scripts_dir.exists():
+    _gm_scripts_dir = Path(os.path.abspath(os.path.dirname(__file__)))
+
+if str(_gm_scripts_dir) not in sys.path:
+    sys.path.insert(0, str(_gm_scripts_dir))
+
+# Hide argparse from scripts that check sys.argv
 _gm_old_argv = sys.argv
 sys.argv = ["_godmode_loader"]
 
-def _gm_load(path):
-    ns = dict(globals())
-    ns["__name__"] = "_godmode_module"
-    ns["__file__"] = str(path)
-    exec(compile(open(path).read(), str(path), 'exec'), ns)
-    return ns
-
-for _gm_script in ["parseltongue.py", "godmode_race.py", "auto_jailbreak.py"]:
-    _gm_path = _gm_scripts_dir / _gm_script
-    if _gm_path.exists():
-        _gm_ns = _gm_load(_gm_path)
-        for _gm_k, _gm_v in _gm_ns.items():
-            if not _gm_k.startswith('_gm_') and (callable(_gm_v) or _gm_k.isupper()):
-                globals()[_gm_k] = _gm_v
+from parseltongue import *
+from godmode_race import *
+from auto_jailbreak import *
 
 sys.argv = _gm_old_argv
 
 # Cleanup loader vars
-for _gm_cleanup in ['_gm_scripts_dir', '_gm_old_argv', '_gm_load', '_gm_ns', '_gm_k',
-                     '_gm_v', '_gm_script', '_gm_path', '_gm_cleanup']:
+for _gm_cleanup in ['_gm_scripts_dir', '_gm_old_argv', '_gm_cleanup']:
     globals().pop(_gm_cleanup, None)

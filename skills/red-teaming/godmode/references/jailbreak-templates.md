@@ -114,7 +114,9 @@ hermes
 ### Via the GODMODE CLASSIC racer script
 
 ```python
-exec(open(os.path.join(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")), "skills/red-teaming/godmode/scripts/godmode_race.py")).read())
+import sys, os
+sys.path.insert(0, os.path.join(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")), "skills/red-teaming/godmode/scripts"))
+from godmode_race import *
 result = race_godmode_classic("Your query here")
 print(f"Winner: {result['codename']} — Score: {result['score']}")
 print(result['content'])
