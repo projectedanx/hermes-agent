@@ -1878,24 +1878,35 @@ def recompute_ready(conn: sqlite3.Connection) -> int:
     """
     promoted = 0
     with write_txn(conn):
-        todo_rows = conn.execute(
-            "SELECT id FROM tasks WHERE status = 'todo'"
-        ).fetchall()
-        for row in todo_rows:
-            task_id = row["id"]
-            parents = conn.execute(
-                "SELECT t.status FROM tasks t "
-                "JOIN task_links l ON l.parent_id = t.id "
-                "WHERE l.child_id = ?",
-                (task_id,),
-            ).fetchall()
-            if all(p["status"] in {"done", "archived"} for p in parents):
-                conn.execute(
-                    "UPDATE tasks SET status = 'ready' WHERE id = ? AND status = 'todo'",
-                    (task_id,),
-                )
-                _append_event(conn, task_id, "promoted", None)
-                promoted += 1
+        # We find tasks that are 'todo' and do not have any parent that is NOT 'done' or 'archived'.
+        ready_tasks = conn.execute("""
+            SELECT t.id
+            FROM tasks t
+            WHERE t.status = 'todo'
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM task_links l
+                  JOIN tasks p ON l.parent_id = p.id
+                  WHERE l.child_id = t.id
+                    AND p.status NOT IN ('done', 'archived')
+              )
+            """).fetchall()
+
+        if ready_tasks:
+            task_ids = [(r["id"],) for r in ready_tasks]
+
+            cursor = conn.executemany(
+                "UPDATE tasks SET status = 'ready' WHERE id = ? AND status = 'todo'",
+                task_ids,
+            )
+
+            # Use rowcount to ensure we only count if the update actually happened
+            # (though with the select just before, it almost certainly did)
+            if cursor.rowcount > 0:
+                for (task_id,) in task_ids:
+                    _append_event(conn, task_id, "promoted", None)
+                    promoted += 1
+
     return promoted
 
 
