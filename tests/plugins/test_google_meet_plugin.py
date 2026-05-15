@@ -13,12 +13,14 @@ Does NOT spawn a real Chromium — we mock ``subprocess.Popen`` where needed.
 """
 
 from __future__ import annotations
+import sys
 
 import json
 import os
 import signal
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from plugins.google_meet.meet_bot import run_bot
 
 import pytest
 
@@ -36,7 +38,7 @@ def _isolate_home(tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 
 def test_is_safe_meet_url_accepts_standard_meet_codes():
-    from plugins.google_meet.meet_bot import _is_safe_meet_url
+    from plugins.google_meet.meet_bot import _is_safe_meet_url, run_bot
 
     assert _is_safe_meet_url("https://meet.google.com/abc-defg-hij")
     assert _is_safe_meet_url("https://meet.google.com/abc-defg-hij?pli=1")
@@ -45,7 +47,7 @@ def test_is_safe_meet_url_accepts_standard_meet_codes():
 
 
 def test_is_safe_meet_url_rejects_non_meet_urls():
-    from plugins.google_meet.meet_bot import _is_safe_meet_url
+    from plugins.google_meet.meet_bot import _is_safe_meet_url, run_bot
 
     # wrong host
     assert not _is_safe_meet_url("https://evil.example.com/abc-defg-hij")
@@ -812,3 +814,131 @@ def test_cmd_install_realtime_skips_when_deps_present(capsys):
     assert sudo_calls == [], f"unexpected sudo invocation: {sudo_calls}"
     out = capsys.readouterr().out
     assert "already installed" in out
+
+
+def test_run_bot_missing_url(capsys):
+    with patch.dict(os.environ, {}, clear=True):
+        assert run_bot() == 2
+        captured = capsys.readouterr()
+        assert "HERMES_MEET_URL must be a meet.google.com URL" in captured.err
+
+
+def test_run_bot_missing_out_dir(capsys):
+    with patch.dict(
+        os.environ,
+        {"HERMES_MEET_URL": "https://meet.google.com/abc-defg-hij"},
+        clear=True,
+    ):
+        assert run_bot() == 2
+        captured = capsys.readouterr()
+        assert "HERMES_MEET_OUT_DIR is required" in captured.err
+
+
+def test_run_bot_playwright_missing(capsys, tmp_path):
+    env = {
+        "HERMES_MEET_URL": "https://meet.google.com/abc-defg-hij",
+        "HERMES_MEET_OUT_DIR": str(tmp_path),
+    }
+    with patch.dict(os.environ, env, clear=True):
+        with patch.dict(sys.modules, {"playwright.sync_api": None}):
+            assert run_bot() == 3
+            captured = capsys.readouterr()
+            assert "playwright is not installed" in captured.err
+
+
+def test_run_bot_navigation_failure(tmp_path, capsys):
+    env = {
+        "HERMES_MEET_URL": "https://meet.google.com/abc-defg-hij",
+        "HERMES_MEET_OUT_DIR": str(tmp_path),
+    }
+
+    mock_pw_module = MagicMock()
+    mock_pw_context = MagicMock()
+    mock_pw = MagicMock()
+    mock_browser = MagicMock()
+    mock_context = MagicMock()
+    mock_page = MagicMock()
+
+    mock_pw_module.sync_playwright.return_value = mock_pw_context
+    mock_pw_context.__enter__.return_value = mock_pw
+    mock_pw.chromium.launch.return_value = mock_browser
+    mock_browser.new_context.return_value = mock_context
+    mock_context.new_page.return_value = mock_page
+
+    # Make goto raise an Exception
+    mock_page.goto.side_effect = Exception("Navigation failed")
+
+    with patch.dict(os.environ, env, clear=True):
+        with patch.dict(sys.modules, {"playwright.sync_api": mock_pw_module}):
+            assert run_bot() == 4
+
+
+def test_run_bot_transcribe_duration_expired(tmp_path):
+    env = {
+        "HERMES_MEET_URL": "https://meet.google.com/abc-defg-hij",
+        "HERMES_MEET_OUT_DIR": str(tmp_path),
+        "HERMES_MEET_DURATION": "0.1s",  # 100ms
+    }
+
+    mock_pw_module = MagicMock()
+    mock_pw_context = MagicMock()
+    mock_pw = MagicMock()
+    mock_browser = MagicMock()
+    mock_context = MagicMock()
+    mock_page = MagicMock()
+
+    mock_pw_module.sync_playwright.return_value = mock_pw_context
+    mock_pw_context.__enter__.return_value = mock_pw
+    mock_pw.chromium.launch.return_value = mock_browser
+    mock_browser.new_context.return_value = mock_context
+    mock_context.new_page.return_value = mock_page
+
+    mock_page.evaluate.return_value = None
+
+    with patch.dict(os.environ, env, clear=True):
+        with patch.dict(sys.modules, {"playwright.sync_api": mock_pw_module}):
+            with patch("time.sleep", return_value=None):
+                assert run_bot() == 0
+
+
+def test_run_bot_realtime_setup_failure(tmp_path):
+    env = {
+        "HERMES_MEET_URL": "https://meet.google.com/abc-defg-hij",
+        "HERMES_MEET_OUT_DIR": str(tmp_path),
+        "HERMES_MEET_MODE": "realtime",
+        "HERMES_MEET_REALTIME_KEY": "fake_key",
+        "HERMES_MEET_DURATION": "0.1s",
+    }
+
+    mock_pw_module = MagicMock()
+    mock_pw_context = MagicMock()
+    mock_pw = MagicMock()
+    mock_browser = MagicMock()
+    mock_context = MagicMock()
+    mock_page = MagicMock()
+
+    mock_pw_module.sync_playwright.return_value = mock_pw_context
+    mock_pw_context.__enter__.return_value = mock_pw
+    mock_pw.chromium.launch.return_value = mock_browser
+    mock_browser.new_context.return_value = mock_context
+    mock_context.new_page.return_value = mock_page
+
+    mock_page.evaluate.return_value = None
+
+    mock_audio_bridge_module = MagicMock()
+    mock_bridge_cls = MagicMock()
+    mock_bridge = MagicMock()
+    mock_bridge.setup.side_effect = Exception("Bridge setup failed")
+    mock_bridge_cls.return_value = mock_bridge
+    mock_audio_bridge_module.AudioBridge = mock_bridge_cls
+
+    with patch.dict(os.environ, env, clear=True):
+        with patch.dict(
+            sys.modules,
+            {
+                "playwright.sync_api": mock_pw_module,
+                "plugins.google_meet.audio_bridge": mock_audio_bridge_module,
+            },
+        ):
+            with patch("time.sleep", return_value=None):
+                assert run_bot() == 0
