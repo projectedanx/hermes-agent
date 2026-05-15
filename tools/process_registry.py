@@ -131,6 +131,20 @@ class ProcessSession:
     _reader_thread: Optional[threading.Thread] = field(default=None, repr=False)
     _pty: Any = field(default=None, repr=False)  # ptyprocess handle (when use_pty=True)
 
+    def __del__(self) -> None:
+        try:
+            if getattr(self, "process", None) is not None:
+                if self.process.poll() is None:
+                    try:
+                        self.process.terminate()
+                        self.process.wait(timeout=1.0)
+                    except Exception:
+                        pass
+                self.process = None
+        except Exception:
+            pass
+
+
 
 class ProcessRegistry:
     """
