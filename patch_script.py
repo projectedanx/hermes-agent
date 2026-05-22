@@ -1,6 +1,6 @@
 import re
 
-with open("tinker-atropos/tinker_atropos/trainer.py", "r") as f:
+with open("tinker-atropos/tinker_atropos/trainer.py", "r", encoding="utf-8") as f:
     content = f.read()
 
 # Add aiohttp import if not present
@@ -142,5 +142,5 @@ if old_train_step_call in content:
 else:
     print("WARNING: Could not find old_train_step_call block")
 
-with open("tinker-atropos/tinker_atropos/trainer.py", "w") as f:
+with open("tinker-atropos/tinker_atropos/trainer.py", "w", encoding="utf-8") as f:
     f.write(content)
