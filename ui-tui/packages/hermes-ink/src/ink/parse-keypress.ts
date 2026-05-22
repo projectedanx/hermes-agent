@@ -73,7 +73,6 @@ function createPasteKey(content: string): ParsedKey {
     ctrl: false,
     meta: false,
     shift: false,
-    option: false,
     super: false,
     sequence: content,
     raw: content,
@@ -556,7 +555,6 @@ export type ParsedKey = {
   ctrl: boolean
   meta: boolean
   shift: boolean
-  option: boolean
   super: boolean
   sequence: string | undefined
   raw: string | undefined
@@ -654,7 +652,7 @@ function parseTextWithSgrMouseFragments(text: string): ParsedInput[] | null {
   let cursor = 0
   let consumedAny = false
 
-  for (let i = 0; i < matches.length;) {
+  for (let i = 0; i < matches.length; ) {
     const first = matches[i]!
     const run: RegExpMatchArray[] = [first]
     let runEnd = first.index! + first[0].length
@@ -706,7 +704,6 @@ function parseKeypress(s: string = ''): ParsedKey {
     ctrl: false,
     meta: false,
     shift: false,
-    option: false,
     super: false,
     sequence: s,
     raw: s,
@@ -733,7 +730,6 @@ function parseKeypress(s: string = ''): ParsedKey {
       ctrl: mods.ctrl,
       meta: mods.meta,
       shift: mods.shift,
-      option: false,
       super: mods.super,
       sequence: s,
       raw: s,
@@ -755,7 +751,6 @@ function parseKeypress(s: string = ''): ParsedKey {
       ctrl: mods.ctrl,
       meta: mods.meta,
       shift: mods.shift,
-      option: false,
       super: mods.super,
       sequence: s,
       raw: s,
@@ -840,16 +835,12 @@ function parseKeypress(s: string = ''): ParsedKey {
   } else if ((parts = FN_KEY_RE.exec(s))) {
     const segs = [...s]
 
-    if (segs[0] === '\u001b' && segs[1] === '\u001b') {
-      key.option = true
-    }
-
     const code = [parts[1], parts[2], parts[4], parts[6]].filter(Boolean).join('')
 
     const modifier = ((parts[3] || parts[5] || 1) as number) - 1
 
     key.ctrl = !!(modifier & 4)
-    key.meta = !!(modifier & 2)
+    key.meta = !!(modifier & 2) || (segs[0] === '\u001b' && segs[1] === '\u001b')
     key.super = !!(modifier & 8)
     key.shift = !!(modifier & 1)
     key.code = code
@@ -898,7 +889,6 @@ function createNavKey(s: string, name: string, ctrl: boolean): ParsedKey {
     ctrl,
     meta: false,
     shift: false,
-    option: false,
     super: false,
     fn: false,
     sequence: s,
@@ -914,7 +904,6 @@ function createWheelKey(s: string, name: 'wheelup' | 'wheeldown', button: number
     ctrl: !!(button & 0x10),
     meta: !!(button & 0x08),
     shift: !!(button & 0x04),
-    option: false,
     super: false,
     fn: false,
     sequence: s,
