@@ -654,7 +654,7 @@ function parseTextWithSgrMouseFragments(text: string): ParsedInput[] | null {
   let cursor = 0
   let consumedAny = false
 
-  for (let i = 0; i < matches.length;) {
+  for (let i = 0; i < matches.length; ) {
     const first = matches[i]!
     const run: RegExpMatchArray[] = [first]
     let runEnd = first.index! + first[0].length

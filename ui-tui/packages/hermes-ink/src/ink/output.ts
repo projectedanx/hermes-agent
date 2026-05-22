@@ -543,9 +543,24 @@ export default class Output {
             // from writeLineToScreen is tab-expansion-aware, unlike
             // x+stringWidth(line) which treats tabs as width 0.
             if (softWrap) {
+              const isNextSW = softWrap[swFrom + offsetY + 1] === true
               const isSW = softWrap[swFrom + offsetY] === true
               swBits[lineY] = isSW ? prevContentEnd : 0
               prevContentEnd = contentEnd
+
+              // If the next line is a continuation (soft-wrapped), and the current
+              // line ends exactly 1 column before the boundary, it means a wide
+              // character (e.g. CJK/emoji) couldn't fit and wrapped to the next
+              // line. Place a SpacerHead explicitly to match terminal behavior.
+              if (isNextSW && contentEnd === screenWidth - 1) {
+                setCellAt(screen, contentEnd, lineY, {
+                  char: ' ',
+                  styleId: this.stylePool.none,
+                  width: CellWidth.SpacerHead,
+                  hyperlink: undefined
+                })
+                writeCells++
+              }
             }
 
             offsetY++
