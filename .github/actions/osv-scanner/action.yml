@@ -1,0 +1,40 @@
+name: OSV-Scanner
+inputs:
+  scan-args:
+    description: 'Arguments to pass to osv-scanner'
+    required: false
+  fail-on-vuln:
+    description: 'Whether to fail the job if a vulnerability is found'
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: "Run scanner"
+      uses: google/osv-scanner-action/osv-scanner-action@8dc09193bb540e09b23da07ad7e30bd33bf87018 # v2.3.8
+      with:
+        scan-args: |-
+          --output=results.json
+          --format=json
+          ${{ inputs.scan-args }}
+      continue-on-error: true
+      id: scan
+    - name: "Run reporter"
+      uses: google/osv-scanner-action/osv-reporter-action@8dc09193bb540e09b23da07ad7e30bd33bf87018 # v2.3.8
+      with:
+        scan-args: |-
+          --output=results.sarif
+          --new=results.json
+          --gh-annotations=false
+          --fail-on-vuln=${{ inputs.fail-on-vuln }}
+    - name: "Upload artifact"
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: OSV Scanner SARIF file
+        path: results.sarif
+        retention-days: 5
+    - name: "Upload SARIF"
+      uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4.31.10
+      if: ${{ !cancelled() }}
+      with:
+        sarif_file: results.sarif
