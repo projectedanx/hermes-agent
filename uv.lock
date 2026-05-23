@@ -166,6 +166,19 @@ wheels = [
 ]
 
 [[package]]
+name = "aioresponses"
+version = "0.7.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/de/03/532bbc645bdebcf3b6af3b25d46655259d66ce69abba7720b71ebfabbade/aioresponses-0.7.8.tar.gz", hash = "sha256:b861cdfe5dc58f3b8afac7b0a6973d5d7b2cb608dd0f6253d16b8ee8eaf6df11", size = 40253, upload-time = "2025-01-19T18:14:03.222Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/b7/584157e43c98aa89810bc2f7099e7e01c728ecf905a66cf705106009228f/aioresponses-0.7.8-py2.py3-none-any.whl", hash = "sha256:b73bd4400d978855e55004b23a3a84cb0f018183bcf066a85ad392800b5b9a94", size = 12518, upload-time = "2025-01-19T18:13:59.633Z" },
+]
+
+[[package]]
 name = "aiosignal"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1994,6 +2007,7 @@ all = [
     { name = "agent-client-protocol" },
     { name = "aiohttp" },
     { name = "aiohttp-socks", marker = "sys_platform == 'linux'" },
+    { name = "aioresponses" },
     { name = "aiosqlite", marker = "sys_platform == 'linux'" },
     { name = "alibabacloud-dingtalk" },
     { name = "asyncpg", marker = "sys_platform == 'linux'" },
@@ -2046,6 +2060,7 @@ daytona = [
     { name = "daytona" },
 ]
 dev = [
+    { name = "aioresponses" },
     { name = "debugpy" },
     { name = "mcp" },
     { name = "pytest" },
@@ -2182,6 +2197,7 @@ requires-dist = [
     { name = "aiohttp", marker = "extra == 'messaging'", specifier = ">=3.13.4,<4" },
     { name = "aiohttp", marker = "extra == 'sms'", specifier = ">=3.13.4,<4" },
     { name = "aiohttp-socks", marker = "extra == 'matrix'", specifier = ">=0.10,<1" },
+    { name = "aioresponses", marker = "extra == 'dev'", specifier = ">=0.7.0,<1" },
     { name = "aiosqlite", marker = "extra == 'matrix'", specifier = ">=0.20" },
     { name = "alibabacloud-dingtalk", marker = "extra == 'dingtalk'", specifier = ">=2.0.0" },
     { name = "anthropic", specifier = ">=0.87.0,<1" },
