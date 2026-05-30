@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          submodules: true
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y ripgrep
@@ -42,6 +44,8 @@ jobs:
           uv venv .venv --python 3.11
           source .venv/bin/activate
           uv pip install -e ".[all,dev]"
+          uv pip install -e ./tinker-atropos
+          uv pip install torch --index-url https://download.pytorch.org/whl/cpu
 
       - name: Run tests
         run: |
@@ -59,6 +63,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          submodules: true
 
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b  # v8.1.0
@@ -71,6 +77,8 @@ jobs:
           uv venv .venv --python 3.11
           source .venv/bin/activate
           uv pip install -e ".[all,dev]"
+          uv pip install -e ./tinker-atropos
+          uv pip install torch --index-url https://download.pytorch.org/whl/cpu
 
       - name: Run e2e tests
         run: |
