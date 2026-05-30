@@ -45,6 +45,7 @@ jobs:
           source .venv/bin/activate
           uv pip install -e ".[all,dev]"
           uv pip install -e ./tinker-atropos
+          uv pip install torch --index-url https://download.pytorch.org/whl/cpu
 
       - name: Run tests
         run: |
@@ -77,6 +78,7 @@ jobs:
           source .venv/bin/activate
           uv pip install -e ".[all,dev]"
           uv pip install -e ./tinker-atropos
+          uv pip install torch --index-url https://download.pytorch.org/whl/cpu
 
       - name: Run e2e tests
         run: |
